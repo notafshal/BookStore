@@ -8,7 +8,7 @@ export default function Cart() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  console.log(cart);
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -23,6 +23,17 @@ export default function Cart() {
     fetchCart();
   }, []);
 
+  const totalPrice = () => {
+    if (!cart || cart.length === 0) return 0;
+
+    const total = cart.reduce((sum, item) => {
+      const price = item.book?.price || 0;
+      const quantity = item.quantity || 1;
+      return sum + price * quantity;
+    }, 0);
+
+    return total;
+  };
   const removeItem = async (id) => {
     try {
       await api.delete(`/cart/${id}`);
@@ -41,11 +52,6 @@ export default function Cart() {
       console.error("Checkout failed:", err);
     }
   };
-
-  const subtotal = cart.reduce(
-    (total, item) => total + item.price * (item.quantity || 1),
-    0
-  );
 
   if (loading)
     return <p className="text-center mt-10 text-gray-500">Loading cart...</p>;
@@ -69,7 +75,6 @@ export default function Cart() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="md:col-span-2 space-y-4">
             {cart.map((item) => (
               <div
@@ -88,7 +93,7 @@ export default function Cart() {
                     </h3>
                     <p className="text-sm text-gray-500">{item.book?.author}</p>
                     <p className="mt-2 text-indigo-600 font-medium">
-                      {/* ${item.price.toFixed(2)} */}
+                      ${item.book.price}
                     </p>
                   </div>
                 </div>
@@ -109,21 +114,22 @@ export default function Cart() {
             ))}
           </div>
 
-          {/* Summary */}
           <div className="bg-white p-6 rounded-xl shadow-md h-fit sticky top-24">
             <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
             <div className="flex justify-between mb-2 text-gray-700">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>${totalPrice()}</span>
             </div>
             <div className="flex justify-between mb-4 text-gray-700">
               <span>Shipping</span>
-              <span className="text-green-600 font-medium">Free</span>
+              <span className="text-green-600 font-medium">
+                Cash on Delivery
+              </span>
             </div>
             <hr className="mb-4" />
             <div className="flex justify-between font-semibold text-lg">
               <span>Total</span>
-              //<span>${subtotal.toFixed(2)}</span>
+              //<span>${totalPrice()}</span>
             </div>
 
             <button

@@ -7,9 +7,11 @@ import Navbar from "../components/Navbar";
 export default function Profile() {
   const { user: authUser, setUser: setAuthUser } = useContext(AuthContext);
   const [user, setUser] = useState(authUser);
-  const [loading, setLoading] = useState(!authUser); // if authUser exists, no need to load
+  const [loading, setLoading] = useState(!authUser);
   const [error, setError] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [savedBooks, setSavedBooks] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [form, setForm] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -19,19 +21,15 @@ export default function Profile() {
     password: "",
   });
 
-  const [savedBooks, setSavedBooks] = useState([]);
-  const [orders, setOrders] = useState([]);
-
-  // Fetch latest user info, saved books, and orders
   useEffect(() => {
-    if (!user) return;
+    if (!authUser?.id) return;
 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const { data: freshUser } = await api.get("/user");
+        const { data: freshUser } = await api.get(`/users/${authUser.id}`);
         setUser(freshUser);
-        setAuthUser(freshUser); // update context so it's fresh globally
+        setAuthUser(freshUser);
         setForm({
           name: freshUser.name || "",
           email: freshUser.email || "",
@@ -41,7 +39,7 @@ export default function Profile() {
           password: "",
         });
 
-        const { data: books } = await api.get("/user/saved-books");
+        const { data: books } = await api.get("/saved-books");
         setSavedBooks(books);
 
         const { data: ordersData } = await api.get("/user/orders");
@@ -54,7 +52,7 @@ export default function Profile() {
     };
 
     fetchData();
-  }, [user, setAuthUser]);
+  }, [user?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,7 +68,7 @@ export default function Profile() {
 
       const { data } = await api.put(`/users/${user.id}`, formData);
       setUser(data.user);
-      setAuthUser(data.user); // update context globally
+      setAuthUser(data.user);
       setEditing(false);
       setError(null);
     } catch (err) {
@@ -78,70 +76,75 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100">
+        <p className="text-lg text-indigo-600 animate-pulse">
+          Loading your profile...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-10">
-        <div className="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-2xl font-bold text-indigo-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+          <h2 className="text-3xl font-bold text-indigo-600 text-center mb-8">
             My Profile
           </h2>
 
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {error && (
+            <p className="text-center text-red-500 mb-6 bg-red-50 py-2 rounded-lg">
+              {error}
+            </p>
+          )}
 
           {!editing ? (
-            <div>
-              <p>
-                <strong>Name:</strong> {user.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {user.email}
-              </p>
-              <p>
-                <strong>Number:</strong> {user.number || "-"}
-              </p>
-              <p>
-                <strong>Location:</strong> {user.location || "-"}
-              </p>
-              <p>
-                <strong>Landmark:</strong> {user.landmark || "-"}
-              </p>
+            <div className="space-y-3">
+              <ProfileField label="Name" value={user.name} />
+              <ProfileField label="Email" value={user.email} />
+              <ProfileField label="Number" value={user.number} />
+              <ProfileField label="Location" value={user.location} />
+              <ProfileField label="Landmark" value={user.landmark} />
 
-              <button
-                onClick={() => setEditing(true)}
-                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg"
-              >
-                Edit Profile
-              </button>
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700 transition-all"
+                >
+                  Edit Profile
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {Object.keys(form).map((key) => (
                 <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 capitalize">
+                  <label className="block text-sm font-semibold text-gray-700 capitalize mb-1">
                     {key}
                   </label>
                   <input
                     name={key}
                     value={form[key]}
                     onChange={handleChange}
-                    className="mt-1 w-full border rounded-lg p-2"
                     type={key === "password" ? "password" : "text"}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                   />
                 </div>
               ))}
-              <div className="sm:col-span-2 flex gap-3 mt-4">
+
+              <div className="sm:col-span-2 flex justify-center gap-3 mt-6">
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-full shadow hover:bg-indigo-700 transition"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="px-4 py-2 border rounded-lg"
+                  className="px-6 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
                 >
                   Cancel
                 </button>
@@ -149,43 +152,72 @@ export default function Profile() {
             </div>
           )}
 
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-2">Saved Books</h3>
+          <Section title="Saved Books">
             {savedBooks.length ? (
-              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-5">
                 {savedBooks.map((b) => (
-                  <li key={b.id} className="border rounded-lg p-3 shadow-sm">
-                    <p className="font-medium">{b.title}</p>
-                    <p className="text-sm text-gray-500">{b.author}</p>
+                  <li
+                    key={b.id}
+                    className="border border-gray-200 rounded-xl p-4 bg-indigo-50 hover:bg-indigo-100 transition shadow-sm"
+                  >
+                    <p className="font-semibold text-indigo-700">{b.title}</p>
+                    <p className="text-sm text-gray-600">{b.author}</p>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="text-gray-500">No saved books yet.</p>
             )}
-          </div>
+          </Section>
 
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-2">Orders</h3>
+          <Section title="Orders">
             {orders.length ? (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {orders.map((o) => (
                   <li
                     key={o.id}
-                    className="flex justify-between items-center border p-3 rounded-lg"
+                    className="flex justify-between items-center border border-gray-200 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition"
                   >
-                    <span>Order #{o.id}</span>
-                    <span className="text-sm text-gray-500">{o.status}</span>
+                    <span className="font-medium text-gray-800">
+                      Order #{o.id}
+                    </span>
+                    <span
+                      className={`text-sm font-medium px-3 py-1 rounded-full ${
+                        o.status === "completed"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-yellow-100 text-yellow-600"
+                      }`}
+                    >
+                      {o.status}
+                    </span>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="text-gray-500">No orders yet.</p>
             )}
-          </div>
+          </Section>
         </div>
       </div>
       <Footer />
     </>
+  );
+}
+
+function ProfileField({ label, value }) {
+  return (
+    <p className="text-gray-700">
+      <strong className="text-indigo-600">{label}:</strong>{" "}
+      {value || <span className="text-gray-400">-</span>}
+    </p>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="mt-10">
+      <h3 className="text-xl font-bold text-indigo-700 mb-3">{title}</h3>
+      {children}
+    </div>
   );
 }

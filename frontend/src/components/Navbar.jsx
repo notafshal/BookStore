@@ -1,22 +1,31 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Menu, X, ShoppingCart } from "lucide-react"; // Added cart icon
+import { Menu, X, ShoppingCart, LayoutDashboard } from "lucide-react";
 
 export default function Navbar() {
   const { logout, user } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
     setIsLoggedIn(!!token);
+
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      // Assuming user object has role property ("admin" / "user")
+      setIsAdmin(parsedUser.role === "admin");
+    }
   }, [user]);
 
   const handleLogout = async () => {
     await logout();
     setIsLoggedIn(false);
+    setIsAdmin(false);
     setMenuOpen(false);
     navigate("/login");
   };
@@ -47,6 +56,16 @@ export default function Navbar() {
           >
             <ShoppingCart size={18} className="mr-1" /> Cart
           </Link>
+
+          {/* Admin Dashboard Link */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="hover:text-indigo-600 transition flex items-center"
+            >
+              <LayoutDashboard size={18} className="mr-1" /> Dashboard
+            </Link>
+          )}
         </div>
 
         {/* Auth Buttons (Desktop) */}
@@ -116,6 +135,17 @@ export default function Navbar() {
             >
               <ShoppingCart size={18} className="mr-1" /> Cart
             </Link>
+
+            {/* Admin Dashboard (Mobile) */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMenuOpen(false)}
+                className="hover:text-indigo-600 flex items-center"
+              >
+                <LayoutDashboard size={18} className="mr-1" /> Dashboard
+              </Link>
+            )}
 
             <hr />
 

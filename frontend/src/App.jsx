@@ -8,8 +8,8 @@ import Cart from "./pages/Cart";
 //import Checkout from "./pages/Checkout";
 //import Orders from "./pages/Orders";
 import TrackOrder from "./pages/TrackOrder";
-//import UserProfile from "./pages/UserProfile";
-//import AdminDashboard from "./pages/AdminDashboard";
+
+import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthProvider";
 import Shop from "./pages/Shop";
@@ -27,6 +27,7 @@ function App() {
           <Route path="/books/:id" element={<BookDetail />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/admin" element={<AdminDashboard />} />
 
           <Route
             path="/cart"

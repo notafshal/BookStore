@@ -39,7 +39,7 @@ export default function Profile() {
           password: "",
         });
 
-        const { data: books } = await api.get("/saved-books");
+        const { data: books } = await api.get("/user/books");
         setSavedBooks(books);
 
         const { data: ordersData } = await api.get("/user/orders");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { Search } from "lucide-react"; // Optional: icon for search
+import { Search } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);

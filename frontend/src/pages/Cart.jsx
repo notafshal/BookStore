@@ -83,7 +83,7 @@ export default function Cart() {
               >
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                   <img
-                    src={item.book?.image || "/placeholder-book.jpg"}
+                    src={item.book?.cover_image || "/placeholder-book.jpg"}
                     alt={item.book?.title}
                     className="w-20 h-24 object-cover rounded-md"
                   />

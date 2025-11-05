@@ -20,26 +20,23 @@ Route::post('/books/{book_id}/reviews', [ReviewController::class, 'store']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-
-   
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart', [CartController::class, 'store']);
     Route::delete('/cart/{id}', [CartController::class, 'destroy']);
     Route::post('/checkout', [CartController::class, 'checkout']);
 
-   
     Route::get('/orders/{order_id}/track', [UserController::class, 'trackOrder']);
     Route::get('/user/orders', [UserController::class, 'orders']);
 
-   
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::post('/user/books/{book_id}', [UserController::class, 'saveBook']);
-    Route::get('/user/books', [UserController::class, 'savedBooks']);
+    Route::get('/user/books', [UserController::class, 'savedBook']);
+   Route::post('/user/books/{book_id}/toggle', [UserController::class, 'toggleSaveBook']);
+    
 });
 
 

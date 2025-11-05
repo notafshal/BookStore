@@ -56,7 +56,13 @@ export default function Navbar() {
           >
             <ShoppingCart size={18} className="mr-1" /> Cart
           </Link>
-
+          <Link
+            to="/favourites"
+            onClick={() => setMenuOpen(false)}
+            className="hover:text-indigo-600 flex items-center"
+          >
+            ❤️ Favs
+          </Link>
           {/* Admin Dashboard Link */}
           {isAdmin && (
             <Link
@@ -134,6 +140,13 @@ export default function Navbar() {
               className="hover:text-indigo-600 flex items-center"
             >
               <ShoppingCart size={18} className="mr-1" /> Cart
+            </Link>
+            <Link
+              to="/favourites"
+              onClick={() => setMenuOpen(false)}
+              className="hover:text-indigo-600 flex items-center"
+            >
+              ❤️ Favs
             </Link>
 
             {/* Admin Dashboard (Mobile) */}

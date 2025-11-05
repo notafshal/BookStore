@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { AuthContext } from "../context/AuthContext";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
 import api from "../api/axios";
 
 export default function BookDetail() {
@@ -15,22 +16,55 @@ export default function BookDetail() {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFavourite, setIsFavourite] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Fetch book details
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const { data } = await api.get(`/books/${id}`);
         setBook(data);
-        setLoading(false);
       } catch (err) {
-        setError(`Book not found.${err}`);
+        setError(`Book not found. ${err}`);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchBook();
   }, [id]);
+
+  // Check if book is already favourited
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchFavouriteStatus = async () => {
+      try {
+        const { data } = await api.get("/user/books");
+        const favIds = data.map((b) => b.id);
+        setIsFavourite(favIds.includes(Number(id)));
+      } catch (err) {
+        console.error("Error checking favourites:", err);
+      }
+    };
+
+    fetchFavouriteStatus();
+  }, [user, id]);
+
+  // Toggle favourite (save/unsave)
+  const toggleFavourite = async (bookId) => {
+    if (!user) return navigate("/login");
+
+    try {
+      const { data } = await api.post(`/user/books/${bookId}/toggle`);
+      setMessage(data.message);
+      setIsFavourite(data.favourited); // update the UI state
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to update favourites.");
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!user) return navigate("/login");
@@ -64,19 +98,34 @@ export default function BookDetail() {
     <>
       <Navbar />
 
-      <div className="max-w-5xl mx-auto px-5 py-10 flex flex-col md:flex-row gap-10 mt-10 items-start">
+      <div className="min-h-screen max-w-5xl mx-auto px-5 py-10 flex flex-col md:flex-row gap-10 mt-10 items-start">
+        {/* Book Image */}
         <motion.div
-          className="flex-shrink-0 w-full md:w-1/3 rounded-2xl overflow-hidden shadow-lg"
+          className="flex-shrink-0 w-full md:w-1/3 rounded-2xl overflow-hidden shadow-lg relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <img
-            src={book.image || "/placeholder-book.jpg"}
+            src={book.cover_image || "/placeholder-book.jpg"}
             alt={book.title}
             className="w-full h-80 object-cover"
           />
+
+          {/* ❤️ Favourite Toggle Button */}
+          <button
+            onClick={toggleFavourite}
+            className="absolute top-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-2 hover:scale-110 transition"
+          >
+            <Heart
+              size={28}
+              className={`transition-colors ${
+                isFavourite ? "fill-red-500 text-red-500" : "text-gray-400"
+              }`}
+            />
+          </button>
         </motion.div>
 
+        {/* Book Info */}
         <motion.div
           className="flex-1"
           initial={{ opacity: 0 }}
@@ -94,7 +143,7 @@ export default function BookDetail() {
           </p>
           <p className="text-gray-700 mb-6">{book.description}</p>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <button
               onClick={handleAddToCart}
               className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
@@ -114,33 +163,6 @@ export default function BookDetail() {
           )}
         </motion.div>
       </div>
-
-      <motion.div
-        className="max-w-5xl mx-auto px-5 pb-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
-        {book.reviews && book.reviews.length > 0 ? (
-          <ul className="space-y-4">
-            {book.reviews.map((review) => (
-              <li
-                key={review.id}
-                className="p-4 border border-gray-200 rounded-xl bg-white shadow-sm"
-              >
-                <p className="text-yellow-500 font-semibold">
-                  ⭐ {review.rating} / 5
-                </p>
-                <p className="text-gray-700 mt-1">
-                  {review.comment || "No comment provided."}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No reviews yet.</p>
-        )}
-      </motion.div>
 
       <Footer />
     </>

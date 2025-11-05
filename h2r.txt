@@ -1,4 +1,8 @@
-1. Install NodeJS
+1. Install NodeJS and Laravel 11
 2. unzip the file
-3. run 
-"npm run dev" on frontend root folder
+3. setup .env files to attach to DB in backend
+4. open frontend on bash
+5. run "npm run dev" on frontend root folder
+6.open backend and run "php artisan migrate"
+7.In backend run "php artisan serve"
+

@@ -73,16 +73,43 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
-     public function saveBook($book_id, Request $request)
-    {
-        $user = $request->user();
-        $user->savedBooks()->syncWithoutDetaching([$book_id]);
-        return response()->json(['message' => 'Book saved successfully']);
+ public function toggleSaveBook($book_id, Request $request)
+{
+    $user = $request->user();
+
+    
+    $book = \App\Models\Book::find($book_id);
+    if (!$book) {
+        return response()->json(['message' => 'Book not found'], 404);
     }
-     public function savedBooks(Request $request)
-    {
-        return response()->json($request->user()->savedBooks);
+
+    
+    $alreadySaved = $user->savedBooks()->where('book_id', $book_id)->exists();
+
+    if ($alreadySaved) {
+      
+        $user->savedBooks()->detach($book_id);
+        return response()->json([
+            'message' => 'Book unsaved successfully',
+            'favourited' => false
+        ]);
+    } else {
+        
+        $user->savedBooks()->attach($book_id);
+        return response()->json([
+            'message' => 'Book saved successfully',
+            'favourited' => true
+        ]);
     }
+}
+
+
+public function savedBooks(Request $request)
+{
+    $savedBooks = $request->user()->savedBooks()->get();
+    return response()->json($savedBooks);
+}
+
 
     public function orders(Request $request)
     {

@@ -113,15 +113,31 @@ export default function Inventory() {
               className="border p-2 rounded"
               required
             />
-            <input
-              type="text"
-              placeholder="Category"
+            <select
               value={bookData.category}
               onChange={(e) =>
                 setBookData({ ...bookData, category: e.target.value })
               }
-              className="border p-2 rounded"
-            />
+              className="border p-2 rounded capitalize bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
+            >
+              <option value="">Select Category</option>
+              <option value="Programming">Programming</option>
+              <option value="Fiction">Fiction</option>
+              <option value="Finance">Finance</option>
+              <option value="Science">Science</option>
+              <option value="Technology">Technology</option>
+              <option value="History">History</option>
+              <option value="Biography">Biography</option>
+              <option value="Self Help">Self Help</option>
+              <option value="Philosophy">Philosophy</option>
+              <option value="Art">Art</option>
+              <option value="Comics">Comics</option>
+              <option value="Health">Health</option>
+              <option value="Travel">Travel</option>
+              <option value="Education">Education</option>
+              <option value="Poetry">Poetry</option>
+            </select>
+
             <input
               type="number"
               placeholder="Price"

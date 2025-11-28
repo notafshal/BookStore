@@ -1,13 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Menu, X, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { Menu, X, ShoppingCart, LayoutDashboard, Search } from "lucide-react";
 
 export default function Navbar() {
   const { logout, user } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +18,6 @@ export default function Navbar() {
 
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
-
       setIsAdmin(parsedUser.role === "admin");
     }
   }, [user]);
@@ -28,6 +28,15 @@ export default function Navbar() {
     setIsAdmin(false);
     setMenuOpen(false);
     navigate("/login");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(search)}`);
+      setSearch("");
+      setMenuOpen(false);
+    }
   };
 
   return (
@@ -41,19 +50,35 @@ export default function Navbar() {
           📚 Sanjit E-Bookstore
         </Link>
 
-        <div className="hidden md:flex space-x-6 font-medium text-gray-700">
+        <div className="hidden md:flex items-center space-x-6 font-medium text-gray-700">
           <Link to="/" className="hover:text-indigo-600 transition">
             Home
           </Link>
           <Link to="/shop" className="hover:text-indigo-600 transition">
             Shop
           </Link>
+
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center bg-gray-100 rounded-full px-3 py-1.5 shadow-inner"
+          >
+            <Search size={18} className="text-gray-500 mr-2" />
+            <input
+              type="text"
+              placeholder="Search books..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-transparent outline-none text-sm w-40 md:w-60"
+            />
+          </form>
+
           <Link
             to="/cart"
             className="hover:text-indigo-600 transition flex items-center"
           >
             <ShoppingCart size={18} className="mr-1" /> Cart
           </Link>
+
           <Link
             to="/favourites"
             onClick={() => setMenuOpen(false)}
@@ -115,6 +140,20 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md border-t animate-slide-down">
           <div className="flex flex-col px-6 py-4 space-y-3 font-medium text-gray-700">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center bg-gray-100 rounded-full px-3 py-1.5"
+            >
+              <Search size={18} className="text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search books..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="bg-transparent outline-none text-sm flex-1"
+              />
+            </form>
+
             <Link
               to="/"
               onClick={() => setMenuOpen(false)}

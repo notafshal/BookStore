@@ -64,7 +64,6 @@ export default function Users() {
           <p className="text-center text-sm text-gray-700 mb-4">{message}</p>
         )}
 
-        {/* Search Bar */}
         <div className="flex items-center mb-8 bg-gray-100 rounded-full px-4 py-2 shadow-inner w-full md:w-1/2 mx-auto">
           <Search className="text-gray-500 w-5 h-5 mr-3" />
           <input
@@ -76,7 +75,6 @@ export default function Users() {
           />
         </div>
 
-        {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-lg shadow">
           <table className="min-w-full border-collapse">
             <thead className="bg-indigo-600 text-white text-sm">
@@ -124,7 +122,6 @@ export default function Users() {
           </table>
         </div>
 
-        {/* Mobile Cards */}
         <div className="grid md:hidden gap-4">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((u) => (

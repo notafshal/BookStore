@@ -2,20 +2,40 @@ import { Link } from "react-router-dom";
 
 export default function BookCard({ book }) {
   return (
-    <div className="border p-4 rounded-lg shadow hover:shadow-lg">
+    <div className="group bg-white rounded-2xl shadow hover:shadow-xl transition p-4 relative">
+      <div className="absolute top-3 left-3 flex gap-2">
+        {book.featured && (
+          <span className="text-xs bg-yellow-400 px-2 py-1 rounded-full">
+            Featured
+          </span>
+        )}
+        {book.popular && (
+          <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full">
+            Popular
+          </span>
+        )}
+      </div>
+
       <img
-        src={book.cover_image || "/placeholder.jpg"}
+        src={book.cover_image || "/placeholder-book.jpg"}
         alt={book.title}
-        className="h-48 w-full object-cover mb-3"
+        className="w-full h-60 object-cover rounded-xl mb-4"
       />
-      <h3 className="font-semibold text-lg">{book.title}</h3>
-      <p className="text-gray-600">${book.price}</p>
-      <Link
-        to={`/books/${book.id}`}
-        className="inline-block mt-3 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        View Details
-      </Link>
+
+      <h2 className="font-bold text-lg group-hover:text-indigo-600 transition">
+        {book.title}
+      </h2>
+      <p className="text-gray-500 text-sm">{book.author}</p>
+
+      <div className="flex items-center justify-between mt-3">
+        <span className="text-indigo-700 font-bold">${book.price}</span>
+        <Link
+          to={`/books/${book.id}`}
+          className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          <button>View</button>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -11,33 +11,31 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'landmark' => 'nullable|string|max:150',
-            'location' => 'nullable|string|max:150',
-            'number' => 'nullable|string|max:20',
-             'role' => 'nullable | in:customer,admin',
-        ]);
+ public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:100',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+    ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'landmark' => $request->landmark,
-            'location' => $request->location,
-            'number'   => $request->number,
-             'role' => $request->role ?? 'customer',
-        ]);
+    
+    $role = str_ends_with($request->email, '@admin.com')
+        ? 'admin'
+        : 'customer';
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
-    }
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        'role'     => $role,
+    ]);
+
+    return response()->json([
+        'message' => 'User registered successfully',
+        'user' => $user,
+    ], 201);
+}
 
    
     public function login(Request $request)

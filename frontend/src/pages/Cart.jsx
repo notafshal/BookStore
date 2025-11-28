@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { Trash2 } from "lucide-react";
+import { Trash2, CreditCard, Truck } from "lucide-react";
 import Navbar from "../components/Navbar";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,14 +27,13 @@ export default function Cart() {
   const totalPrice = () => {
     if (!cart || cart.length === 0) return 0;
 
-    const total = cart.reduce((sum, item) => {
+    return cart.reduce((sum, item) => {
       const price = item.book?.price || 0;
       const quantity = item.quantity || 1;
       return sum + price * quantity;
     }, 0);
-
-    return total;
   };
+
   const removeItem = async (id) => {
     try {
       await api.delete(`/cart/${id}`);
@@ -45,7 +45,7 @@ export default function Cart() {
 
   const checkout = async () => {
     try {
-      await api.post("/checkout");
+      await api.post("/checkout", { payment_method: paymentMethod });
       setCart([]);
       navigate("/orders");
     } catch (err) {
@@ -57,90 +57,160 @@ export default function Cart() {
     return <p className="text-center mt-10 text-gray-500">Loading cart...</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-5 py-20 min-h-screen">
+    <>
       <Navbar />
-      <h2 className="text-3xl font-bold mb-8 text-center text-indigo-600">
-        🛒 Your Shopping Cart
-      </h2>
+      <div className="max-w-6xl mx-auto px-5 py-20 min-h-screen">
+        <h2 className="text-3xl font-bold mb-8 text-center text-indigo-600">
+          🛒 Your Shopping Cart
+        </h2>
 
-      {cart.length === 0 ? (
-        <div className="text-center mt-20">
-          <p className="text-gray-500 text-lg mb-4">Your cart is empty.</p>
-          <button
-            onClick={() => navigate("/shop")}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Continue Shopping
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-4">
-            {cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition"
-              >
-                <div className="flex items-center gap-4 w-full sm:w-auto">
-                  <img
-                    src={item.book?.cover_image || "/placeholder-book.jpg"}
-                    alt={item.book?.title}
-                    className="w-20 h-24 object-cover rounded-md"
+        {cart.length === 0 ? (
+          <div className="text-center mt-20">
+            <p className="text-gray-500 text-lg mb-4">Your cart is empty.</p>
+            <button
+              onClick={() => navigate("/shop")}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-4">
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition"
+                >
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <img
+                      src={item.book?.cover_image || "/placeholder-book.jpg"}
+                      alt={item.book?.title}
+                      className="w-20 h-24 object-cover rounded-md"
+                    />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.book?.title}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {item.book?.author}
+                      </p>
+                      <p className="mt-2 text-indigo-600 font-medium">
+                        ${item.book.price}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 mt-4 sm:mt-0">
+                    <p className="font-medium text-gray-700">
+                      Qty: {item.quantity || 1}
+                    </p>
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="text-red-500 hover:text-red-700 transition"
+                      title="Remove item"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-md h-fit sticky top-24">
+              <h3 className="text-xl font-semibold mb-4 text-gray-800">
+                Order Summary
+              </h3>
+
+              <div className="flex justify-between mb-2 text-gray-700">
+                <span>Subtotal</span>
+                <span>${totalPrice()}</span>
+              </div>
+
+              <div className="flex justify-between mb-4 text-gray-700">
+                <span>Shipping</span>
+                <span className="text-green-600 font-medium">
+                  {paymentMethod === "cod"
+                    ? "Cash on Delivery"
+                    : "Online Payment"}
+                </span>
+              </div>
+
+              <div className="space-y-3 mb-5">
+                <p className="text-gray-800 font-medium mb-2">
+                  Choose Payment Method:
+                </p>
+
+                <div
+                  onClick={() => setPaymentMethod("cod")}
+                  className={`cursor-pointer border-2 rounded-xl p-4 flex items-center gap-3 transition-all ${
+                    paymentMethod === "cod"
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200 hover:border-green-400"
+                  }`}
+                >
+                  <Truck
+                    size={24}
+                    className={`${
+                      paymentMethod === "cod"
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {item.book?.title}
-                    </h3>
-                    <p className="text-sm text-gray-500">{item.book?.author}</p>
-                    <p className="mt-2 text-indigo-600 font-medium">
-                      ${item.book.price}
+                    <p className="font-semibold text-gray-800">
+                      Cash on Delivery
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Pay when the book is delivered to you.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 mt-4 sm:mt-0">
-                  <p className="font-medium text-gray-700">
-                    Qty: {item.quantity || 1}
-                  </p>
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="text-red-500 hover:text-red-700 transition"
-                    title="Remove item"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                <div
+                  onClick={() => setPaymentMethod("online")}
+                  className={`cursor-pointer border-2 rounded-xl p-4 flex items-center gap-3 transition-all ${
+                    paymentMethod === "online"
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-400"
+                  }`}
+                >
+                  <CreditCard
+                    size={24}
+                    className={`${
+                      paymentMethod === "online"
+                        ? "text-indigo-600"
+                        : "text-gray-500"
+                    }`}
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      Online Payment
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Secure card or wallet payment.
+                    </p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-md h-fit sticky top-24">
-            <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
-            <div className="flex justify-between mb-2 text-gray-700">
-              <span>Subtotal</span>
-              <span>${totalPrice()}</span>
-            </div>
-            <div className="flex justify-between mb-4 text-gray-700">
-              <span>Shipping</span>
-              <span className="text-green-600 font-medium">
-                Cash on Delivery
-              </span>
-            </div>
-            <hr className="mb-4" />
-            <div className="flex justify-between font-semibold text-lg">
-              <span>Total</span>
-              //<span>${totalPrice()}</span>
-            </div>
+              <hr className="mb-4" />
 
-            <button
-              onClick={checkout}
-              className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
-            >
-              Proceed to Checkout
-            </button>
+              <div className="flex justify-between font-semibold text-lg">
+                <span>Total</span>
+                <span>${totalPrice()}</span>
+              </div>
+
+              <button
+                onClick={checkout}
+                className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+              >
+                Proceed to Checkout
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

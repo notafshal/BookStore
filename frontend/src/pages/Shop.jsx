@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import api from "../api/axios";
-import Footer from "../components/Footer";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import api from "../api/axios";
+import BookCard from "../components/BookCard";
+import FilterSidebar from "../components/FilterSidebar";
+import SkeletonCard from "../components/SkeletonCard";
 
 export default function Shop() {
   const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const [category, setCategory] = useState("all");
+  const [price, setPrice] = useState(100);
+  const [sort, setSort] = useState("");
+
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const search = query.get("search")?.toLowerCase() || "";
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        setLoading(true);
         const { data } = await api.get("/books");
-        setBooks(data.books || data);
+        setBooks(data);
       } catch (err) {
         console.error(err);
-        setError("Failed to fetch books. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -25,78 +34,70 @@ export default function Shop() {
     fetchBooks();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
-        <div className="text-lg text-gray-600 animate-pulse">
-          Loading books...
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    let result = [...books];
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
-        <div className="text-red-600 text-center px-4">{error}</div>
-      </div>
-    );
-  }
+    if (search) {
+      result = result.filter(
+        (b) =>
+          b.title?.toLowerCase().includes(search) ||
+          b.author?.toLowerCase().includes(search)
+      );
+    }
+
+    if (category !== "all") {
+      result = result.filter((b) => b.category === category);
+    }
+
+    result = result.filter((b) => b.price <= price);
+
+    if (sort === "price") result.sort((a, b) => a.price - b.price);
+    if (sort === "az") result.sort((a, b) => a.title.localeCompare(b.title));
+
+    setFilteredBooks(result);
+  }, [books, search, category, price, sort]);
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 py-10 px-4 mt-10">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
-            📚 Explore Our Collection
-          </h2>
 
-          {books.length === 0 ? (
-            <p className="text-center text-gray-500">No books available.</p>
-          ) : (
-            <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1"
-                >
-                  <img
-                    src={
-                      book.cover_image ||
-                      "https://via.placeholder.com/300x400?text=No+Cover"
-                    }
-                    alt={book.title}
-                    className="w-full h-64 object-cover"
-                  />
-                  <div className="p-5 flex flex-col justify-between h-48">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 truncate">
-                        {book.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {book.author || "Unknown Author"}
-                      </p>
-                    </div>
+      <div className="max-w-7xl mx-auto px-5 py-16">
+        <h1 className="text-4xl font-bold text-indigo-700 text-center mb-14">
+          🛍️ Explore Books
+        </h1>
 
-                    <div className="mt-4 flex justify-between items-center">
-                      <span className="text-indigo-600 font-bold text-lg">
-                        ${book.price}
-                      </span>
-                      <Link
-                        to={`/books/${book.id}`}
-                        className="text-white bg-indigo-600 hover:bg-indigo-700 text-sm px-3 py-1.5 rounded-lg transition"
-                      >
-                        View
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <FilterSidebar
+            category={category}
+            setCategory={setCategory}
+            price={price}
+            setPrice={setPrice}
+            sort={sort}
+            setSort={setSort}
+          />
+
+          <section className="md:col-span-3">
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filteredBooks.length === 0 ? (
+              <p className="text-center text-gray-500">
+                No books found{search && ` for "${search}"`}
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {filteredBooks.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       </div>
+
       <Footer />
     </>
   );

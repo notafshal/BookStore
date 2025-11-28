@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminOrderController;
+use App\Http\Controllers\API\AdminReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BookSearchController;
@@ -49,7 +50,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/books', [BookController::class, 'store']);
     Route::put('/books/{book}', [BookController::class, 'update']);
     Route::delete('/books/{book}', [BookController::class, 'destroy']);
-
+ Route::get('/admin/reports/dashboard', [AdminReportController::class, 'dashboard']);
      Route::get('/admin/orders', [AdminOrderController::class, 'allOrders']);
     Route::put('/admin/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
     Route::delete('/admin/orders/{id}', [AdminOrderController::class, 'cancelOrder']);

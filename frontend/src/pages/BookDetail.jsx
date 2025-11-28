@@ -100,16 +100,8 @@ export default function BookDetail() {
   const handleBuyNow = async () => {
     if (!user) return navigate("/login");
 
-    try {
-      await api.post("/buy-now", {
-        book_id: id,
-        quantity: 1,
-      });
-      navigate("/orders");
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Checkout failed.");
-    }
+    handleAddToCart();
+    navigate("/cart");
   };
 
   const handlePostReview = async () => {

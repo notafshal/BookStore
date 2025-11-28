@@ -113,44 +113,6 @@ export default function Register() {
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700 mb-1">Location</label>
-              <input
-                type="text"
-                name="location"
-                placeholder="Your location"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none"
-                onChange={handleChange}
-                value={formData.location}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1">
-                Nearest Landmark
-              </label>
-              <input
-                type="text"
-                name="landmark"
-                placeholder="Nearest Landmark"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none"
-                onChange={handleChange}
-                value={formData.landmark}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1">Number</label>
-              <input
-                type="text"
-                name="number"
-                placeholder="Your Number"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none"
-                onChange={handleChange}
-                value={formData.number}
-              />
-            </div>
-
             <button
               type="submit"
               disabled={loading}

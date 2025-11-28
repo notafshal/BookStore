@@ -6,9 +6,7 @@ use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class Authenticate extends Middleware
 {
-    /**
-     * Handle unauthenticated requests.
-     */
+    
     protected function redirectTo($request): ?string
     {
         

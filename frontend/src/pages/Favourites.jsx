@@ -23,8 +23,8 @@ export default function Favourites() {
     const fetchFavourites = async () => {
       setLoading(true);
       try {
-        const { data } = await api.get("/user/books");
-        setBooks(Array.isArray(data) ? data : data.books || []);
+        const { data } = await api.get("/user/saved-books");
+        setBooks(data.saved_books || []);
       } catch (err) {
         console.error("Error fetching favourites:", err);
         setError("Failed to load favourites. Please try again later.");
@@ -36,19 +36,15 @@ export default function Favourites() {
     fetchFavourites();
   }, [user, navigate]);
 
-  // Toggle favourite (remove or re-add)
-  const toggleFavourite = async (bookId) => {
+  const removeFavourite = async (bookId) => {
     try {
-      const { data } = await api.post(`/user/books/${bookId}/toggle`);
+      const { data } = await api.delete(`/user/saved-books/${bookId}`);
       setMessage(data.message);
 
-      // Remove from list if unfavourited
-      if (!data.favourited) {
-        setBooks((prev) => prev.filter((b) => b.id !== bookId));
-      }
+      setBooks((prev) => prev.filter((b) => b.id !== bookId));
     } catch (err) {
-      console.error("Error toggling favourite:", err);
-      setMessage("❌ Failed to update favourite.");
+      console.error("Error removing favourite:", err);
+      setMessage("❌ Failed to remove favourite.");
     }
   };
 
@@ -56,7 +52,7 @@ export default function Favourites() {
     <>
       <Navbar />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 mt-10">
         <div className="max-w-7xl mx-auto px-5 py-12">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-indigo-700 mb-10">
             ❤️ My Favourite Books
@@ -81,13 +77,12 @@ export default function Favourites() {
               {books.map((book) => (
                 <div
                   key={book.id}
-                  className="bg-white border rounded-2xl p-4 shadow hover:shadow-2xl transition transform hover:-translate-y-1 cursor-pointer flex flex-col relative group"
+                  className="bg-white border rounded-2xl p-4 shadow hover:shadow-2xl transition transform hover:-translate-y-1 relative group"
                 >
-                  {/* Unfavourite Button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleFavourite(book.id);
+                      removeFavourite(book.id);
                     }}
                     className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 hover:scale-110 transition"
                     title="Remove from favourites"
@@ -101,11 +96,12 @@ export default function Favourites() {
                   <img
                     src={book.cover_image || "/placeholder-book.jpg"}
                     alt={book.title}
-                    className="w-full h-56 object-cover rounded-lg mb-4"
+                    className="w-full h-56 object-cover rounded-lg mb-4 cursor-pointer"
                     onClick={() => navigate(`/books/${book.id}`)}
                   />
+
                   <div
-                    className="flex-1"
+                    className="flex-1 cursor-pointer"
                     onClick={() => navigate(`/books/${book.id}`)}
                   >
                     <h3 className="font-semibold text-lg text-gray-800 mb-1 line-clamp-1">
@@ -115,6 +111,7 @@ export default function Favourites() {
                       {book.author}
                     </p>
                   </div>
+
                   <p className="text-indigo-600 font-bold mt-3">
                     ${book.price ?? "N/A"}
                   </p>

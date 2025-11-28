@@ -30,7 +30,7 @@ public function cartItems()
 }
 public function savedByUsers()
 {
-    return $this->belongsToMany(User::class, 'book_user', 'book_id', 'user_id')
+    return $this->belongsToMany(User::class, 'user_saved_books', 'book_id', 'user_id')
                 ->withTimestamps();
 }
 

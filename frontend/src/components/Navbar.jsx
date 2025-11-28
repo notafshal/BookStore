@@ -17,7 +17,7 @@ export default function Navbar() {
 
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
-      // Assuming user object has role property ("admin" / "user")
+
       setIsAdmin(parsedUser.role === "admin");
     }
   }, [user]);
@@ -33,7 +33,6 @@ export default function Navbar() {
   return (
     <nav className="bg-white/80 backdrop-blur-lg shadow-md fixed top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        {/* Logo */}
         <Link
           to="/"
           className="text-2xl font-bold text-indigo-600 flex items-center"
@@ -42,7 +41,6 @@ export default function Navbar() {
           📚 Sanjit E-Bookstore
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 font-medium text-gray-700">
           <Link to="/" className="hover:text-indigo-600 transition">
             Home
@@ -63,7 +61,7 @@ export default function Navbar() {
           >
             ❤️ Favs
           </Link>
-          {/* Admin Dashboard Link */}
+
           {isAdmin && (
             <Link
               to="/admin"
@@ -74,7 +72,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Auth Buttons (Desktop) */}
         {!isLoggedIn ? (
           <div className="hidden md:flex space-x-4">
             <Link
@@ -107,7 +104,6 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Mobile Menu Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-gray-700 focus:outline-none"
@@ -116,7 +112,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md border-t animate-slide-down">
           <div className="flex flex-col px-6 py-4 space-y-3 font-medium text-gray-700">
@@ -149,7 +144,6 @@ export default function Navbar() {
               ❤️ Favs
             </Link>
 
-            {/* Admin Dashboard (Mobile) */}
             {isAdmin && (
               <Link
                 to="/admin"

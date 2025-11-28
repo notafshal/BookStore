@@ -1,4 +1,3 @@
-// src/components/AdminSidebar.jsx
 export default function AdminSidebar({ activeTab, setActiveTab }) {
   const items = [
     { id: "inventory", label: "Inventory Management" },

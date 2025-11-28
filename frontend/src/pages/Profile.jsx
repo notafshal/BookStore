@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-
+import { useNavigate } from "react-router-dom";
 export default function Profile() {
   const { user: authUser, setUser: setAuthUser } = useContext(AuthContext);
   const [user, setUser] = useState(authUser);
@@ -20,7 +20,7 @@ export default function Profile() {
     landmark: user?.landmark || "",
     password: "",
   });
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (!authUser?.id) return;
 
@@ -39,8 +39,8 @@ export default function Profile() {
           password: "",
         });
 
-        const { data: books } = await api.get("/user/books");
-        setSavedBooks(books);
+        const { data } = await api.get("/user/saved-books");
+        setSavedBooks(data.saved_books || []);
 
         const { data: ordersData } = await api.get("/user/orders");
         setOrders(ordersData);
@@ -85,7 +85,9 @@ export default function Profile() {
       </div>
     );
   }
-
+  const handleTrackOrder = (orderId) => {
+    navigate(`/orders/${orderId}`);
+  };
   return (
     <>
       <Navbar />
@@ -176,16 +178,24 @@ export default function Profile() {
                 {orders.map((o) => (
                   <li
                     key={o.id}
-                    className="flex justify-between items-center border border-gray-200 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition"
+                    onClick={() => handleTrackOrder(o.id)}
+                    className="flex justify-between items-center border border-gray-200 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition hover:cursor-pointer"
                   >
                     <span className="font-medium text-gray-800">
                       Order #{o.id}
                     </span>
+
                     <span
                       className={`text-sm font-medium px-3 py-1 rounded-full ${
-                        o.status === "completed"
+                        o.status === "delivered"
                           ? "bg-green-100 text-green-600"
-                          : "bg-yellow-100 text-yellow-600"
+                          : o.status === "on_delivery"
+                          ? "bg-blue-100 text-blue-600"
+                          : o.status === "pending"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : o.status === "cancelled"
+                          ? "bg-red-100 text-red-600"
+                          : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {o.status}

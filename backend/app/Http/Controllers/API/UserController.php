@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\Book;
+use App\Models\Order;
 
 class UserController extends Controller
 {
@@ -73,41 +74,93 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
- public function toggleSaveBook($book_id, Request $request)
+ public function saveBook($book_id, Request $request)
 {
     $user = $request->user();
-
-    
     $book = \App\Models\Book::find($book_id);
+
     if (!$book) {
         return response()->json(['message' => 'Book not found'], 404);
     }
 
-    
-    $alreadySaved = $user->savedBooks()->where('book_id', $book_id)->exists();
-
-    if ($alreadySaved) {
-      
-        $user->savedBooks()->detach($book_id);
+    if ($user->savedBooks()->where('book_id', $book_id)->exists()) {
         return response()->json([
-            'message' => 'Book unsaved successfully',
-            'favourited' => false
-        ]);
-    } else {
-        
-        $user->savedBooks()->attach($book_id);
-        return response()->json([
-            'message' => 'Book saved successfully',
+            'message' => 'Book already saved',
             'favourited' => true
         ]);
     }
+
+    $user->savedBooks()->attach($book_id);
+
+    return response()->json([
+        'message' => 'Book saved successfully',
+        'favourited' => true
+    ], 201);
 }
 
+public function deleteSavedBook($book_id, Request $request)
+{
+    $user = $request->user();
+    $book = \App\Models\Book::find($book_id);
+
+    if (!$book) {
+        return response()->json(['message' => 'Book not found'], 404);
+    }
+
+    if (!$user->savedBooks()->where('book_id', $book_id)->exists()) {
+        return response()->json([
+            'message' => 'Book is not in saved list',
+            'favourited' => false
+        ], 400);
+    }
+
+    $user->savedBooks()->detach($book_id);
+
+    return response()->json([
+        'message' => 'Book unsaved successfully',
+        'favourited' => false
+    ]);
+}
 
 public function savedBooks(Request $request)
 {
-    $savedBooks = $request->user()->savedBooks()->get();
-    return response()->json($savedBooks);
+    $user = $request->user();
+    if (!$user) {
+        return response()->json(['error' => 'User not authenticated'], 401);
+    }
+
+    $savedBooks = $user->savedBooks()->get();
+
+    return response()->json([
+        'saved_books' => $savedBooks
+    ]);
+}
+
+public function buyNow(Request $request)
+{
+    $request->validate([
+        'book_id' => 'required|exists:books,id',
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    $book = Book::findOrFail($request->book_id);
+    $user = $request->user();
+
+    $order = Order::create([
+        'user_id' => $user->id,
+        'status' => 'pending',
+        'payment_method' => 'cod',
+    ]);
+
+    $order->books()->attach($book->id, [
+        'price' => $book->price,
+        'quantity' => $request->quantity,
+    ]);
+
+    return response()->json([
+        'message' => 'Order created successfully',
+        'order_id' => $order->id,
+    ]);
 }
 
 
@@ -115,7 +168,8 @@ public function savedBooks(Request $request)
     {
         return response()->json($request->user()->orders);
     }
-    public function trackOrder($order_id, Request $request)
+    
+    public function trackOrder(Request $request, $order_id)
 {
     $user = $request->user(); 
 

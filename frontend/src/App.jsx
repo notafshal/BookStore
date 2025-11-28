@@ -4,8 +4,8 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import BookDetail from "./pages/BookDetail";
 import Cart from "./pages/Cart";
-//import Checkout from "./pages/Checkout";
-//import Orders from "./pages/Orders";
+
+import Orders from "./pages/Orders";
 import TrackOrder from "./pages/TrackOrder";
 
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -46,6 +46,15 @@ function App() {
             }
           />
           <Route
+            path="/orders/:orderId"
+            element={
+              <ProtectedRoute>
+                <TrackOrder />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/favourites"
             element={
               <ProtectedRoute>
@@ -53,39 +62,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          /> */}
-          {/* <Route
+
+          <Route
             path="/orders"
             element={
               <ProtectedRoute>
                 <Orders />
               </ProtectedRoute>
             }
-          /> */}
-          {/* <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <UserProfile />
-              </ProtectedRoute>
-            }
-          /> */}
-
-          {/* <Route
-            path="/admin"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          /> */}
+          />
 
           <Route
             path="*"

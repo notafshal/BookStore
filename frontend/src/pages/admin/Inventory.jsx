@@ -84,7 +84,6 @@ export default function Inventory() {
         </button>
       </div>
 
-      {/* Book Form */}
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-lg mb-8 border">
           <h3 className="text-xl font-semibold mb-4 text-indigo-700">
@@ -169,7 +168,6 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Book Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow-lg border">
         <table className="min-w-full text-sm text-gray-700">
           <thead className="bg-indigo-600 text-white">
